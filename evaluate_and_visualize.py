@@ -61,26 +61,6 @@ def evaluate():
     # Visualization
     visualize(X_test, yb_test, yl_test, pred_boxes, y_pred_cls, model_path="model/face_mask_detector.keras")
 
-def visualize(X, y_box, y_label, pred_box, pred_label, num_samples=10, model_path=None):
-    indices = np.random.choice(len(X), num_samples, replace=False)
-    
-    if not os.path.exists("predictions"):
-        os.makedirs("predictions")
-        
-    for i in indices:
-        img = X[i].copy()
-        h, w, _ = img.shape
-        
-        # True Box (Green)
-        t_box = y_box[i]
-        cv2.rectangle(img, 
-                      (int(t_box[0]*w), int(t_box[1]*h)), 
-                      (int(t_box[2]*w), int(t_box[3]*h)), 
-                      (0, 255, 0), 2)
-        
-        # Pred Box (Red)
-        p_box = pred_box[i]
-        cv2.rectangle(img, 
                       (int(p_box[0]*w), int(p_box[1]*h)), 
                       (int(p_box[2]*w), int(p_box[3]*h)), 
                       (0, 0, 255), 2)
@@ -102,16 +82,4 @@ if __name__ == "__main__":
     else:
         evaluate()
 
-# visualize 10 images
-for i in random.sample(range(len(X_test)), 10):
-    img = (X_test[i] * 255).astype("uint8")
-    h, w, _ = img.shape
 
-    pb = pred_boxes[i]
-    xmin, ymin, xmax, ymax = (pb * [w,h,w,h]).astype(int)
-
-    cv2.rectangle(img, (xmin,ymin), (xmax,ymax), (0,255,0), 2)
-    cv2.imshow("Prediction", img)
-    cv2.waitKey(0)
-
-cv2.destroyAllWindows()
