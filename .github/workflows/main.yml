@@ -1,0 +1,50 @@
+name: Face Mask Detection Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        # Ensure matplotlib is installed (sometimes missed)
+        pip install matplotlib
+
+    - name: Prepare Data (Generate dataset.npz)
+      run: python prepare_data.py
+
+    - name: Train Model (Smoke Test - 1 Epoch)
+      # We'll run full training, but ideally for CI you'd want a shorter run.
+      # Given the dataset is small, 20 epochs is fine, or we can modify train_model.py to take args.
+      # For now, let's run the actual script to prove it works.
+      run: python train_model.py
+
+    - name: Evaluate Model
+      run: python evaluate_and_visualize.py
+
+    - name: Export TFLite
+      run: python export_tflite.py
+
+    - name: Archive Production Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: trained-model
+        path: |
+          model/face_mask_detector.keras
+          model/face_mask_detector.tflite
+          predictions/
